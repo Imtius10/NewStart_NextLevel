@@ -1,0 +1,10 @@
+enum UserRole {
+  TENANT
+  Landlord
+}
+
+enum RentalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

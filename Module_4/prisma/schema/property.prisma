@@ -1,0 +1,14 @@
+model Property {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  location    String
+  landlordId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  landlord User @relation("LandlordProperties", fields: [landlordId], references: [id], onDelete: Cascade)
+
+  rentalRequests RentalRequest[]
+}
