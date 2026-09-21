@@ -10,6 +10,7 @@ model RentalRequest {
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   tenant User @relation("TenantRequests", fields: [tenantId], references: [id])
+  reviews Review[]
 
   @@index([propertyId])
   @@index([tenantId])

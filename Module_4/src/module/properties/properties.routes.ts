@@ -25,10 +25,7 @@ router.delete(
 );
 
 // Public routes
-router.get(
-  "/all",
-  propertyController.getAllProperties
-);
+router.get("/", propertyController.getAllProperties);
 
 router.get(
   "/:id",

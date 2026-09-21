@@ -15,3 +15,11 @@ export interface UpdatePropertyData {
   location?: string;
   category?: string;
 }
+
+export interface PropertyQuery {
+  location?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  search?: string;
+}

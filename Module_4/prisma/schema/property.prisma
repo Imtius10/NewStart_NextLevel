@@ -19,4 +19,5 @@ model Property {
   landlord User @relation("LandlordProperties",fields: [landlordId],references: [id],onDelete: Cascade)
 
   rentalRequests RentalRequest[]
+  reviews Review[]
 }

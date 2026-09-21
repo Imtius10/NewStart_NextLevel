@@ -12,6 +12,7 @@ import { userRouter } from "./module/user/user.routes";
 import { propertyRouter } from "./module/properties/properties.routes";
 import { rentalRequestRouter } from "./module/rentalRequest/rentalrequest.routes";
 import { landlordRouter } from './module/landlord/landlord.routes';
+import { adminRouter } from "./module/admin/admin.routes";
 
 const app: Application = express();
 
@@ -37,5 +38,6 @@ app.use("/api/rentals", rentalRequestRouter);
 
 app.use(globalError);
 app.use("/api/landlord", landlordRouter);
+app.use("/api/admin", adminRouter);
 
 export default app;

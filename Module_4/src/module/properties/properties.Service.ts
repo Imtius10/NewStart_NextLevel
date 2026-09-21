@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import {
   CreatePropertyData,
+  PropertyQuery,
   UpdatePropertyData,
 } from "./properties.interface";
 
@@ -28,8 +29,91 @@ const createProperty = async (data: CreatePropertyData) => {
   return property;
 };
 
-const getAllProperties = async () => {
-  const result = await prisma.property.findMany({
+// const getAllProperties = async () => {
+//   const result = await prisma.property.findMany({
+//     include: {
+//       landlord: {
+//         select: {
+//           id: true,
+//           name: true,
+//           email: true,
+//         },
+//       },
+//     },
+//     orderBy: {
+//       createdAt: "desc",
+//     },
+//   });
+
+//   return result;
+// };
+
+const getAllProperties = async (query: PropertyQuery) => {
+  const { location, category, minPrice, maxPrice, search } = query;
+
+  const where: any = {};
+
+  // Location filter
+  if (location) {
+    where.location = {
+      contains: location,
+      mode: "insensitive",
+    };
+  }
+
+  // Category filter
+  if (category) {
+    where.category = {
+      equals: category,
+      mode: "insensitive",
+    };
+  }
+
+  // Price filter
+  if (minPrice || maxPrice) {
+    where.price = {};
+
+    if (minPrice) {
+      where.price.gte = Number(minPrice);
+    }
+
+    if (maxPrice) {
+      where.price.lte = Number(maxPrice);
+    }
+  }
+
+  // General search
+  if (search) {
+    where.OR = [
+      {
+        title: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        description: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        location: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        category: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
+
+  return prisma.property.findMany({
+    where,
     include: {
       landlord: {
         select: {
@@ -43,9 +127,8 @@ const getAllProperties = async () => {
       createdAt: "desc",
     },
   });
-
-  return result;
 };
+
 
 const getPropertyById = async (propertyId: string) => {
   const result = await prisma.property.findUnique({
