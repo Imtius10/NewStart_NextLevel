@@ -4,3 +4,9 @@ export interface IRegister {
   password: string,
   
 }
+
+
+export interface ILoggedIn { 
+  email: string,
+  password:string
+}

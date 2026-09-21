@@ -1,8 +1,9 @@
 import { prisma } from "../../lib/prisma";
 import GlobalError from "../../utils/GlobalError";
-import { IRegister } from "./user.interface";
+import { ILoggedIn, IRegister } from "./user.interface";
 import httpStatus from 'http-status';
 import bcrypt from "bcrypt"
+import { createToken } from "../../utils/jwt";
 
 const userRegisterDB = async (payload:IRegister) => { 
 
@@ -49,7 +50,77 @@ const userRegisterDB = async (payload:IRegister) => {
 }
 
 
+const LoginUserDB = async (payload: ILoggedIn) => { 
+
+    const { email, password } = payload;
+    const validUser = await prisma.user.findUnique({
+        where: {
+            email
+        }
+    });
+
+    if (!validUser) {
+        throw new Error("Email or password wrong");
+    }
+
+    const matchedPassword = await bcrypt.compare(password, validUser.password);
+
+    if (!matchedPassword) {
+        throw new Error("Wrong  password ");
+    }
+
+
+    const jwtPayload = {
+        id: validUser.id,
+        name: validUser.name,
+        email: validUser.email,
+        role:validUser.role
+    }
+
+
+    const accessToken = createToken(jwtPayload, "access");
+      const refreshToken = createToken(
+    {
+      userId: validUser.id,
+    },
+    "refresh"
+  );
+    return {
+        accessToken,
+        refreshToken
+    }
+
+}
+
+
+const getMyProfile = async (userId: string) => { 
+
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        omit: {
+            password: true
+        }
+    });
+
+
+     if (!user) {
+        throw new GlobalError(
+            httpStatus.NOT_FOUND,
+            "User not found"
+        );
+    }
+
+
+    return user
+}
+
+
 
 export const userService = {
-    userRegisterDB
+    userRegisterDB,
+    LoginUserDB,
+    getMyProfile
 }

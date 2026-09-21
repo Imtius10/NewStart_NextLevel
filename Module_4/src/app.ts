@@ -2,6 +2,7 @@ import express,{ Application, Request, Response, urlencoded } from "express";
 import cors from "cors"
 import cookieParser from "cookie-parser";
 import globalError from "./middlewares/GlobalError/globalError";
+import { userRouter } from "./module/user/user.routes";
 
 const app: Application = express();
 
@@ -24,7 +25,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
-app.use("/api/auth",);
+app.use("/api/auth",userRouter);
 
 app.use(globalError);
 
