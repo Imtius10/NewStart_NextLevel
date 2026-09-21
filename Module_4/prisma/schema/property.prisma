@@ -9,6 +9,8 @@ model Property {
   updatedAt   DateTime @updatedAt
 
   landlord User @relation("LandlordProperties", fields: [landlordId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
 
   rentalRequests RentalRequest[]
 }
