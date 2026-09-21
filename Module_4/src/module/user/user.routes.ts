@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { userController } from "./user.Controller";
-import auth from "../../middlewares/auth/auth";
+import { auth } from "../../middlewares/auth/auth";
+import { UserRole } from "../../../generated/prisma/client";
+
 
 
 
@@ -10,7 +12,7 @@ router.post("/register", userController.userRegister);
 
 router.post("/login", userController.userLogin);
 
-router.get("/my-profile",auth ,userController.getMyProfile);
+router.get("/my-profile",auth() ,userController.getMyProfile);
 
 
 

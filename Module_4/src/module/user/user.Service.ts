@@ -3,7 +3,7 @@ import GlobalError from "../../utils/GlobalError";
 import { ILoggedIn, IRegister } from "./user.interface";
 import httpStatus from 'http-status';
 import bcrypt from "bcrypt"
-import { createToken } from "../../utils/jwt";
+import { createToken } from "../../utils/jwtUtils";
 
 const userRegisterDB = async (payload:IRegister) => { 
 
