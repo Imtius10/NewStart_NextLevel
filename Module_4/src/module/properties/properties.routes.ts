@@ -6,19 +6,6 @@ import { propertyController } from "./properties.Controller";
 
 
 const router = Router();
-
-// Public routes
-router.get(
-  "/all",
-  propertyController.getAllProperties
-);
-
-router.get(
-  "/:id",
-  propertyController.getPropertyById
-);
-
-// Landlord routes
 router.post(
   "/",
   auth(UserRole.Landlord),
@@ -36,5 +23,22 @@ router.delete(
   auth(UserRole.Landlord),
   propertyController.deleteProperty
 );
+
+// Public routes
+router.get(
+  "/all",
+  propertyController.getAllProperties
+);
+
+router.get(
+  "/:id",
+  propertyController.getPropertyById
+);
+
+
+
+
+
+
 
 export const propertyRouter = router;

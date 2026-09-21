@@ -4,9 +4,15 @@ import { propertyService } from "./properties.Service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from 'http-status';
 
-const createProperty = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
-
-    const { title, description, price, location } = req.body;
+const createProperty = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const {
+      title,
+      description,
+      price,
+      location,
+      categoryId,
+    } = req.body;
 
     if (!req.user) {
       throw new Error("Unauthorized");
@@ -17,24 +23,18 @@ const createProperty = catchAsync(async (req: Request, res: Response, next: Next
       description,
       price: Number(price),
       location,
+      categoryId,
       landlordId: req.user.id,
     });
 
-    // res.status(201).json({
-    //   success: true,
-    //   message: "Property created successfully",
-    //   data: property,
-    // });
-
     sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.CREATED,
-        message: "Register Success",
-        data:property
-    })
-  
-
-})
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Property created successfully",
+      data: property,
+    });
+  }
+);
 // const getAllProperties = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
 //     async (req: Request, res: Response) => {
 //         const properties = await propertyService.getAllProperties();
@@ -79,36 +79,77 @@ const getPropertyById = catchAsync(async (req: Request, res: Response, next: Nex
 
 
 })
-const updateProperty = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
-     const { id } = req.params;
+// const updateProperty = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
+//      const { id } = req.params;
+
+//     if (!req.user) {
+//       throw new Error("Unauthorized");
+//     }
+
+//     const { title, description, price, location } = req.body;
+
+//     const property = await propertyService.updateProperty(
+//         id as string,
+//         req.user.id,
+//         {
+//           title,
+//           description,
+//           price:
+//             price !== undefined
+//               ? Number(price)
+//               : undefined,
+//           location,
+//         }
+//     );
+//       sendResponse(res, {
+//         success: true,
+//         statusCode: httpStatus.OK,
+//         message:  "Property updated successfully",
+//         data:property
+//     })
+
+// })
+
+
+const updateProperty = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
 
     if (!req.user) {
       throw new Error("Unauthorized");
     }
 
-    const { title, description, price, location } = req.body;
+    const {
+      title,
+      description,
+      price,
+      location,
+      categoryId,
+    } = req.body;
 
     const property = await propertyService.updateProperty(
-        id as string,
-        req.user.id,
-        {
-          title,
-          description,
-          price:
-            price !== undefined
-              ? Number(price)
-              : undefined,
-          location,
-        }
+      id as string,
+      req.user.id,
+      {
+        title,
+        description,
+        price:
+          price !== undefined
+            ? Number(price)
+            : undefined,
+        location,
+        categoryId,
+      }
     );
-      sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message:  "Property updated successfully",
-        data:property
-    })
 
-})
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Property updated successfully",
+      data: property,
+    });
+  }
+);
 const deleteProperty = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
  const { id } = req.params;
 
