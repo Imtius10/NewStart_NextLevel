@@ -5,27 +5,16 @@ import {
 } from "./properties.interface";
 
 const createProperty = async (data: CreatePropertyData) => {
-  const category = await prisma.category.findUnique({
-    where: {
-      id: data.categoryId,
-    },
-  });
-
-  if (!category) {
-    throw new Error("Category not found");
-  }
-
   const property = await prisma.property.create({
     data: {
       title: data.title,
       description: data.description,
       price: data.price,
       location: data.location,
-      categoryId: data.categoryId,
+      category: data.category,
       landlordId: data.landlordId,
     },
     include: {
-      category: true,
       landlord: {
         select: {
           id: true,
@@ -42,7 +31,6 @@ const createProperty = async (data: CreatePropertyData) => {
 const getAllProperties = async () => {
   const result = await prisma.property.findMany({
     include: {
-      category: true,
       landlord: {
         select: {
           id: true,
@@ -65,7 +53,6 @@ const getPropertyById = async (propertyId: string) => {
       id: propertyId,
     },
     include: {
-      category: true,
       landlord: {
         select: {
           id: true,
@@ -100,23 +87,10 @@ const updateProperty = async (
     throw new Error("You are not allowed to update this property");
   }
 
-  if (data.categoryId) {
-    const category = await prisma.category.findUnique({
-      where: {
-        id: data.categoryId,
-      },
-    });
-
-    if (!category) {
-      throw new Error("Category not found");
-    }
-  }
-
   const updatedProperty = await prisma.property.update({
     where: { id },
     data,
     include: {
-      category: true,
       landlord: {
         select: {
           id: true,

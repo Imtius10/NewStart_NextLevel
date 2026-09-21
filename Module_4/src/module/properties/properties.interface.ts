@@ -1,9 +1,10 @@
+
 export interface CreatePropertyData {
   title: string;
   description: string;
   price: number;
   location: string;
-  categoryId: string;
+  category: string;
   landlordId: string;
 }
 
@@ -12,5 +13,5 @@ export interface UpdatePropertyData {
   description?: string;
   price?: number;
   location?: string;
-  categoryId?: string;
+  category?: string;
 }
