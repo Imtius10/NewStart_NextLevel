@@ -6,13 +6,15 @@ import { UserRole } from "../../../generated/prisma/client";
 
 
 
+
 const router = Router();
 
 router.post("/register", userController.userRegister);
 
 router.post("/login", userController.userLogin);
 
-router.get("/my-profile",auth() ,userController.getMyProfile);
+router.get("/my-profile", auth(), userController.getMyProfile);
+
 
 
 

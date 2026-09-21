@@ -9,7 +9,7 @@ const router = Router();
 
 // Public routes
 router.get(
-  "/",
+  "/all",
   propertyController.getAllProperties
 );
 

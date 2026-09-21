@@ -35,20 +35,34 @@ const createProperty = catchAsync(async (req: Request, res: Response, next: Next
   
 
 })
-const getAllProperties = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
-     async (req: Request, res: Response) => {
-    const properties =
-      await propertyService.getAllProperties();
+// const getAllProperties = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
+//     async (req: Request, res: Response) => {
+//         const properties = await propertyService.getAllProperties();
 
-   sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message:  "Properties retrieved successfully",
-        data:properties
-    })
+//         sendResponse(res, {
+//             success: true,
+//             statusCode: httpStatus.OK,
+//             message: "Properties retrieved successfully",
+//             data: properties
+//         })
+//     }
+
+// })
+
+
+
+const getAllProperties = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const properties = await propertyService.getAllProperties();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Properties retrieved successfully",
+      data: properties,
+    });
   }
-
-})
+);
 const getPropertyById = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
 
     const { id } = req.params;

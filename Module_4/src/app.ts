@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import globalError from "./middlewares/GlobalError/globalError";
 import { userRouter } from "./module/user/user.routes";
 import { propertyRouter } from "./module/properties/properties.routes";
+import { rentalRequestRouter } from "./module/rentalRequest/rentalrequest.routes";
 
 const app: Application = express();
 
@@ -28,6 +29,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/api/auth", userRouter);
 app.use("/api/properties", propertyRouter);
+app.use("/api/rentals",rentalRequestRouter);
 
 app.use(globalError);
 
