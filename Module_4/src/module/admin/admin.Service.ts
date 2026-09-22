@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { UserStatus } from "../../../generated/prisma/client";
+import { UserStatus, UserRole } from "../../../generated/prisma/client";
 
 const getAllUsers = async (page: number = 1, limit: number = 10) => {
   const pageNum = Math.max(1, page);
@@ -57,6 +57,39 @@ const updateUserStatus = async (
     data: {
       activeStatus: status,
     },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      activeStatus: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return updatedUser;
+};
+
+const updateUserRole = async (
+  userId: string,
+  role: UserRole
+) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.role === UserRole.ADMIN) {
+    throw new Error("Cannot change admin role");
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { role },
     select: {
       id: true,
       name: true,
@@ -262,6 +295,7 @@ const getStatistics = async () => {
 export const adminService = {
   getAllUsers,
   updateUserStatus,
+  updateUserRole,
   getAllProperties,
   deleteProperty,
   getAllRentalRequests,

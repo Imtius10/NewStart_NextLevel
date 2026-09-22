@@ -3,7 +3,7 @@ import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { adminService } from "./admin.Service";
-import { UserStatus } from "../../../generated/prisma/client";
+import { UserStatus, UserRole } from "../../../generated/prisma/client";
 
 const getAllUsers = catchAsync(
   async (req: Request, res: Response) => {
@@ -113,9 +113,38 @@ const getStatistics = catchAsync(
   }
 );
 
+const updateUserRole = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (
+      role !== UserRole.TENANT &&
+      role !== UserRole.LANDLORD
+    ) {
+      throw new Error(
+        "Role must be TENANT or LANDLORD"
+      );
+    }
+
+    const user = await adminService.updateUserRole(
+      id as string,
+      role
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User role updated successfully",
+      data: user,
+    });
+  }
+);
+
 export const adminController = {
   getAllUsers,
   updateUserStatus,
+  updateUserRole,
   getAllProperties,
   deleteProperty,
   getAllRentalRequests,

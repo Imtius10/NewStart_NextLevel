@@ -19,6 +19,12 @@ router.patch(
   adminController.updateUserStatus
 );
 
+router.patch(
+  "/users/:id/role",
+  auth(UserRole.ADMIN),
+  adminController.updateUserRole
+);
+
 router.get(
   "/properties",
   auth(UserRole.ADMIN),
