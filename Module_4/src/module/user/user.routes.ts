@@ -13,6 +13,10 @@ router.post("/register", userController.userRegister);
 
 router.post("/login", userController.userLogin);
 
+router.post("/refresh-token", userController.refreshToken);
+
+router.post("/logout", userController.logout);
+
 router.get("/my-profile", auth(), userController.getMyProfile);
 
 
