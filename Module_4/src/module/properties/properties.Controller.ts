@@ -129,10 +129,24 @@ const deleteProperty = catchAsync(
   }
 );
 
+const getCategories = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const categories = await propertyService.getCategories();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Categories retrieved successfully",
+      data: categories,
+    });
+  }
+);
+
 export const propertyController = {
   createProperty,
   getAllProperties,
   getPropertyById,
   updateProperty,
   deleteProperty,
+  getCategories,
 };

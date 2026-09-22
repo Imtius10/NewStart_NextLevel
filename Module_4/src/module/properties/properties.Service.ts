@@ -228,10 +228,20 @@ const deleteProperty = async (
   return null;
 };
 
+const getCategories = async () => {
+  const results = await prisma.property.findMany({
+    select: { category: true },
+    distinct: ["category"],
+  });
+
+  return results.map((r) => r.category);
+};
+
 export const propertyService = {
   createProperty,
   getAllProperties,
   getPropertyById,
   updateProperty,
   deleteProperty,
+  getCategories,
 };
