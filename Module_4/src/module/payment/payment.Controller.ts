@@ -52,9 +52,14 @@ const getMyPayments = catchAsync(
       throw new Error("Unauthorized");
     }
 
-    const payments =
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result =
       await paymentService.getMyPayments(
-        req.user.id
+        req.user.id,
+        page,
+        limit
       );
 
     sendResponse(res, {
@@ -62,7 +67,8 @@ const getMyPayments = catchAsync(
       statusCode: httpStatus.OK,
       message:
         "Payment history retrieved successfully",
-      data: payments,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
