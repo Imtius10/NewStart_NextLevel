@@ -7,13 +7,17 @@ import { UserStatus } from "../../../generated/prisma/client";
 
 const getAllUsers = catchAsync(
   async (req: Request, res: Response) => {
-    const users = await adminService.getAllUsers();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result = await adminService.getAllUsers(page, limit);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Users retrieved successfully",
-      data: users,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
@@ -48,13 +52,17 @@ const updateUserStatus = catchAsync(
 
 const getAllProperties = catchAsync(
   async (req: Request, res: Response) => {
-    const properties = await adminService.getAllProperties();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result = await adminService.getAllProperties(page, limit);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "All properties retrieved successfully",
-      data: properties,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
@@ -76,14 +84,18 @@ const deleteProperty = catchAsync(
 
 const getAllRentalRequests = catchAsync(
   async (req: Request, res: Response) => {
-    const requests =
-      await adminService.getAllRentalRequests();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result =
+      await adminService.getAllRentalRequests(page, limit);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "All rental requests retrieved successfully",
-      data: requests,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
