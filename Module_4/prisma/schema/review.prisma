@@ -1,5 +1,5 @@
 model Review {
-  id              String   @id @default(cuid())
+  id              String   @id @default(uuid())
   rentalRequestId String   @unique
   propertyId      String
   tenantId        String

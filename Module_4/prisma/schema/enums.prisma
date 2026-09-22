@@ -16,4 +16,12 @@ enum UserRole {
   ADMIN
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+
 

@@ -1,5 +1,5 @@
 model RentalRequest {
-  id         String       @id @default(cuid())
+  id         String       @id @default(uuid())
   propertyId String
   tenantId   String
   message    String?
