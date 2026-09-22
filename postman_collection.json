@@ -540,6 +540,20 @@
               { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
             ]
           }
+        },
+        {
+          "name": "TEST - Confirm Payment (simulate webhook)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payments/test-confirm",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentId\": \"{{paymentId}}\"\n}"
+            }
+          }
         }
       ]
     },
