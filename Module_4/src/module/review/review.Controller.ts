@@ -45,14 +45,18 @@ const getPropertyReviews = catchAsync(
   async (req: Request, res: Response) => {
     const { propertyId } = req.params;
 
-    const reviews =
-      await reviewService.getPropertyReviews(propertyId as string);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result =
+      await reviewService.getPropertyReviews(propertyId as string, page, limit);
 
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
       message: "Reviews retrieved successfully",
-      data: reviews,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
