@@ -7,6 +7,7 @@ import express, {
 
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 
 import globalError from "./middlewares/GlobalError/globalError";
 
@@ -16,6 +17,7 @@ import { rentalRequestRouter } from "./module/rentalRequest/rentalrequest.routes
 import { landlordRouter } from "./module/landlord/landlord.routes";
 import { adminRouter } from "./module/admin/admin.routes";
 import { reviewRouter } from "./module/review/review.routes";
+import { categoryRouter } from "./module/category/category.routes";
 
 import { paymentRouter } from "./module/payment/payment.routes";
 import { paymentWebhookController } from "./module/payment/payment.webhook.Controller";
@@ -33,11 +35,13 @@ app.post(
 
 
 
+app.use(helmet());
+
 app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5000",
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
   })
 );
@@ -85,6 +89,11 @@ app.use(
 app.use(
   "/api/reviews",
   reviewRouter
+);
+
+app.use(
+  "/api/categories",
+  categoryRouter
 );
 
 app.use(
