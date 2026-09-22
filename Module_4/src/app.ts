@@ -13,6 +13,7 @@ import globalError from "./middlewares/GlobalError/globalError";
 
 import { userRouter } from "./module/user/user.routes";
 import { propertyRouter } from "./module/properties/properties.routes";
+import { propertyController } from "./module/properties/properties.Controller";
 import { rentalRequestRouter } from "./module/rentalRequest/rentalrequest.routes";
 import { landlordRouter } from "./module/landlord/landlord.routes";
 import { adminRouter } from "./module/admin/admin.routes";
@@ -70,9 +71,9 @@ app.use(
   propertyRouter
 );
 
-app.use(
+app.get(
   "/api/categories",
-  propertyRouter
+  propertyController.getCategories
 );
 
 app.use(

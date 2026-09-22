@@ -55973,9 +55973,9 @@ app.use(
   "/api/properties",
   propertyRouter
 );
-app.use(
+app.get(
   "/api/categories",
-  propertyRouter
+  propertyController.getCategories
 );
 app.use(
   "/api/rentals",
