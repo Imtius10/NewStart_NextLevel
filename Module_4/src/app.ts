@@ -17,7 +17,6 @@ import { rentalRequestRouter } from "./module/rentalRequest/rentalrequest.routes
 import { landlordRouter } from "./module/landlord/landlord.routes";
 import { adminRouter } from "./module/admin/admin.routes";
 import { reviewRouter } from "./module/review/review.routes";
-import { categoryRouter } from "./module/category/category.routes";
 
 import { paymentRouter } from "./module/payment/payment.routes";
 import { paymentWebhookController } from "./module/payment/payment.webhook.Controller";
@@ -89,11 +88,6 @@ app.use(
 app.use(
   "/api/reviews",
   reviewRouter
-);
-
-app.use(
-  "/api/categories",
-  categoryRouter
 );
 
 app.use(
