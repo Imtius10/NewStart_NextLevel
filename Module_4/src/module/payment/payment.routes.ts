@@ -34,4 +34,12 @@ router.get(
   paymentController.getPaymentById
 );
 
+/**
+ * DEV: Confirm payment (simulates Stripe webhook)
+ */
+router.post(
+  "/test-confirm",
+  paymentController.testConfirmPayment
+);
+
 export const paymentRouter = router;
