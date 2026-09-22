@@ -49,16 +49,22 @@ const getMyRentalRequests = catchAsync(
       throw new Error("Unauthorized");
     }
 
-    const requests =
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result =
       await rentalRequestService.getMyRentalRequests(
-        req.user.id
+        req.user.id,
+        page,
+        limit
       );
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Rental requests retrieved successfully",
-      data: requests,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
