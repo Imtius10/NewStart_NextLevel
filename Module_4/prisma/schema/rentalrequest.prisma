@@ -11,6 +11,7 @@ model RentalRequest {
 
   tenant User @relation("TenantRequests", fields: [tenantId], references: [id])
   reviews Review[]
+  payment Payment?
 
   @@index([propertyId])
   @@index([tenantId])
