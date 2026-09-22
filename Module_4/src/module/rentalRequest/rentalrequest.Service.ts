@@ -66,36 +66,56 @@ const createRentalRequest = async (
 };
 
 const getMyRentalRequests = async (
-  tenantId: string
+  tenantId: string,
+  page: number = 1,
+  limit: number = 10
 ) => {
-  const requests = await prisma.rentalRequest.findMany({
-    where: {
-      tenantId,
-    },
-    include: {
-      property: {
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          price: true,
-          location: true,
-          landlord: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
+  const pageNum = Math.max(1, page);
+  const limitNum = Math.min(50, Math.max(1, limit));
+  const skip = (pageNum - 1) * limitNum;
+
+  const [data, total] = await Promise.all([
+    prisma.rentalRequest.findMany({
+      where: {
+        tenantId,
+      },
+      include: {
+        property: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            price: true,
+            location: true,
+            landlord: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limitNum,
+    }),
+    prisma.rentalRequest.count({
+      where: { tenantId },
+    }),
+  ]);
 
-  return requests;
+  return {
+    data,
+    meta: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+    },
+  };
 };
 
 const getRentalRequestById = async (

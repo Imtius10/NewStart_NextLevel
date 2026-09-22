@@ -25,6 +25,8 @@ router.delete(
 );
 
 // Public routes
+router.get("/categories", propertyController.getCategories);
+
 router.get("/", propertyController.getAllProperties);
 
 router.get(

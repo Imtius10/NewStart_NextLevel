@@ -22,4 +22,6 @@ export interface PropertyQuery {
   minPrice?: string;
   maxPrice?: string;
   search?: string;
+  page?: string;
+  limit?: string;
 }

@@ -1,23 +1,39 @@
 import { prisma } from "../../lib/prisma";
 import { UserStatus } from "../../../generated/prisma/client";
 
-const getAllUsers = async () => {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      activeStatus: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+const getAllUsers = async (page: number = 1, limit: number = 10) => {
+  const pageNum = Math.max(1, page);
+  const limitNum = Math.min(50, Math.max(1, limit));
+  const skip = (pageNum - 1) * limitNum;
 
-  return users;
+  const [data, total] = await Promise.all([
+    prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        activeStatus: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limitNum,
+    }),
+    prisma.user.count(),
+  ]);
+
+  return {
+    data,
+    meta: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+    },
+  };
 };
 
 const updateUserStatus = async (
@@ -55,38 +71,54 @@ const updateUserStatus = async (
   return updatedUser;
 };
 
-const getAllProperties = async () => {
-  const properties = await prisma.property.findMany({
-    include: {
-      landlord: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          activeStatus: true,
-        },
-      },
-      rentalRequests: {
-        select: {
-          id: true,
-          status: true,
-          tenant: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          createdAt: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+const getAllProperties = async (page: number = 1, limit: number = 10) => {
+  const pageNum = Math.max(1, page);
+  const limitNum = Math.min(50, Math.max(1, limit));
+  const skip = (pageNum - 1) * limitNum;
 
-  return properties;
+  const [data, total] = await Promise.all([
+    prisma.property.findMany({
+      include: {
+        landlord: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            activeStatus: true,
+          },
+        },
+        rentalRequests: {
+          select: {
+            id: true,
+            status: true,
+            tenant: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limitNum,
+    }),
+    prisma.property.count(),
+  ]);
+
+  return {
+    data,
+    meta: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+    },
+  };
 };
 
 const deleteProperty = async (propertyId: string) => {
@@ -109,40 +141,56 @@ const deleteProperty = async (propertyId: string) => {
   return null;
 };
 
-const getAllRentalRequests = async () => {
-  const requests = await prisma.rentalRequest.findMany({
-    include: {
-      property: {
-        select: {
-          id: true,
-          title: true,
-          price: true,
-          location: true,
-          category: true,
-          landlord: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
+const getAllRentalRequests = async (page: number = 1, limit: number = 10) => {
+  const pageNum = Math.max(1, page);
+  const limitNum = Math.min(50, Math.max(1, limit));
+  const skip = (pageNum - 1) * limitNum;
+
+  const [data, total] = await Promise.all([
+    prisma.rentalRequest.findMany({
+      include: {
+        property: {
+          select: {
+            id: true,
+            title: true,
+            price: true,
+            location: true,
+            category: true,
+            landlord: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
             },
           },
         },
-      },
-      tenant: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          activeStatus: true,
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            activeStatus: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limitNum,
+    }),
+    prisma.rentalRequest.count(),
+  ]);
 
-  return requests;
+  return {
+    data,
+    meta: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+    },
+  };
 };
 
 const getStatistics = async () => {

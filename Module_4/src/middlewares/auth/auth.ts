@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
-import { UserRole } from "../../../generated/prisma/client";
+import { UserStatus, UserRole } from "../../../generated/prisma/client";
 import catchAsync from "../../utils/catchAsync";
 import { verifyToken } from "../../utils/jwtUtils";
 import { prisma } from "../../lib/prisma";
@@ -74,6 +74,9 @@ export const auth = (...requiredRoles: UserRole[]) => {
       }
 
       // Check account status
+      if (user.activeStatus === UserStatus.BLOCKED) {
+        throw new Error("Your account has been blocked");
+      }
 
       // Attach authenticated user to request
       req.user = {

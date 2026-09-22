@@ -3,7 +3,6 @@ import catchAsync from "../../utils/catchAsync";
 import { userService } from "./user.Service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from 'http-status';
-import { tr } from "zod/v4/locales/index.js";
 
 
 const userRegister = catchAsync(async (req:Request,res:Response,next:NextFunction) => {
@@ -59,8 +58,41 @@ const getMyProfile = catchAsync(async (req: Request, res: Response, next: NextFu
 
 })
 
-const xxxxxx = catchAsync(async (req: Request, res: Response, next: NextFunction) => { 
 
+const refreshToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies.refreshToken;
+
+    if (!token) {
+        throw new Error("Refresh token not found");
+    }
+
+    const result = await userService.refreshToken(token);
+
+    res.cookie("accessToken", result.accessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 15 * 60 * 1000,
+    });
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Access token refreshed successfully",
+        data: result,
+    });
+})
+
+
+const logout = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Logged out successfully",
+        data: null,
+    });
 })
 
 
@@ -70,5 +102,7 @@ const xxxxxx = catchAsync(async (req: Request, res: Response, next: NextFunction
 export const userController = {
     userRegister,
     userLogin,
-    getMyProfile
+    getMyProfile,
+    refreshToken,
+    logout
 }

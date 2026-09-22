@@ -7,6 +7,7 @@ import express, {
 
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 
 import globalError from "./middlewares/GlobalError/globalError";
 
@@ -33,11 +34,13 @@ app.post(
 
 
 
+app.use(helmet());
+
 app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5000",
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
   })
 );

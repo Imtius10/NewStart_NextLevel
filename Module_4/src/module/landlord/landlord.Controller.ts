@@ -11,15 +11,21 @@ const getMyRentalRequests = catchAsync(
       throw new Error("Unauthorized");
     }
 
-    const requests = await landlordService.getMyRentalRequests(
-      req.user.id
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result = await landlordService.getMyRentalRequests(
+      req.user.id,
+      page,
+      limit
     );
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Rental requests retrieved successfully",
-      data: requests,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
@@ -64,15 +70,21 @@ const getMyProperties = catchAsync(
       throw new Error("Unauthorized");
     }
 
-    const properties = await landlordService.getMyProperties(
-      req.user.id
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const result = await landlordService.getMyProperties(
+      req.user.id,
+      page,
+      limit
     );
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Your properties retrieved successfully",
-      data: properties,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );

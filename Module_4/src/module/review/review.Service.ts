@@ -93,7 +93,9 @@ const createReview = async (data: CreateReviewData) => {
 };
 
 const getPropertyReviews = async (
-  propertyId: string
+  propertyId: string,
+  page: number = 1,
+  limit: number = 10
 ) => {
   // Make sure property exists
   const property = await prisma.property.findUnique({
@@ -109,22 +111,40 @@ const getPropertyReviews = async (
     throw new Error("Property not found");
   }
 
-  return prisma.review.findMany({
-    where: {
-      propertyId,
-    },
-    include: {
-      tenant: {
-        select: {
-          id: true,
-          name: true,
+  const pageNum = Math.max(1, page);
+  const limitNum = Math.min(50, Math.max(1, limit));
+  const skip = (pageNum - 1) * limitNum;
+
+  const where = { propertyId };
+
+  const [data, total] = await Promise.all([
+    prisma.review.findMany({
+      where,
+      include: {
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limitNum,
+    }),
+    prisma.review.count({ where }),
+  ]);
+
+  return {
+    data,
+    meta: {
+      page: pageNum,
+      limit: limitNum,
+      total,
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  };
 };
 
 export const reviewService = {
