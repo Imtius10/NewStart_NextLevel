@@ -49,7 +49,11 @@ const createProperty = async (data: CreatePropertyData) => {
 // };
 
 const getAllProperties = async (query: PropertyQuery) => {
-  const { location, category, minPrice, maxPrice, search } = query;
+  const { location, category, minPrice, maxPrice, search, page = "1", limit = "10" } = query;
+
+  const pageNum = Math.max(1, Number(page));
+  const limitNum = Math.min(50, Math.max(1, Number(limit)));
+  const skip = (pageNum - 1) * limitNum;
 
   const where: any = {};
 
@@ -112,21 +116,35 @@ const getAllProperties = async (query: PropertyQuery) => {
     ];
   }
 
-  return prisma.property.findMany({
-    where,
-    include: {
-      landlord: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
+  const [data, total] = await Promise.all([
+    prisma.property.findMany({
+      where,
+      include: {
+        landlord: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limitNum,
+    }),
+    prisma.property.count({ where }),
+  ]);
+
+  return {
+    data,
+    meta: {
+      page: pageNum,
+      limit: limitNum,
+      total,
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  };
 };
 
 
