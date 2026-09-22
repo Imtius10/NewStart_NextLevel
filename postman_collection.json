@@ -1,11 +1,11 @@
 {
   "info": {
-    "name": "RentNest API - Full Test",
-    "description": "Import → Run 01-Auth first → Then run others in order",
+    "name": "RentNest API - Live Test",
+    "description": "Base URL: https://rent-nest-api-seven.vercel.app/api\nRun 01-Auth first, then others in order.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "baseUrl", "value": "https://rent-nest-api-seven.vercel.app/api" },
     { "key": "adminToken", "value": "" },
     { "key": "landlordToken", "value": "" },
     { "key": "tenantToken", "value": "" },
@@ -19,14 +19,34 @@
       "name": "01 - Auth (Run First)",
       "item": [
         {
+          "name": "Register User",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var d = pm.response.json();",
+                "pm.test('Status 201', () => pm.response.code === 201);",
+                "pm.test('User created', () => d.data.id !== undefined);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@test.com\",\n  \"password\": \"123456\",\n  \"role\": \"TENANT\"\n}" }
+          }
+        },
+        {
           "name": "Login Admin",
           "event": [{
             "listen": "test",
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Login success', () => d.success === true);",
+                "pm.test('Has token', () => d.data.accessToken.length > 10);",
                 "if(d.data && d.data.accessToken){ pm.collectionVariables.set('adminToken', d.data.accessToken); }"
               ]
             }
@@ -35,7 +55,7 @@
             "method": "POST",
             "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"imtius3@example.com\",\n  \"password\": \"12345678\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@rentnest.com\",\n  \"password\": \"admin123\"\n}" }
           }
         },
         {
@@ -45,7 +65,7 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Login success', () => d.success === true);",
                 "if(d.data && d.data.accessToken){ pm.collectionVariables.set('landlordToken', d.data.accessToken); }"
               ]
@@ -65,7 +85,7 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Login success', () => d.success === true);",
                 "if(d.data && d.data.accessToken){ pm.collectionVariables.set('tenantToken', d.data.accessToken); }"
               ]
@@ -84,8 +104,10 @@
             "listen": "test",
             "script": {
               "exec": [
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Has user data', () => pm.response.json().data.email !== undefined);"
+                "var d = pm.response.json();",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has email', () => d.data.email !== undefined);",
+                "pm.test('Has role', () => d.data.role !== undefined);"
               ]
             }
           }],
@@ -97,13 +119,32 @@
         },
         {
           "name": "Refresh Token",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has new token', () => pm.response.json().data.accessToken !== undefined);"
+              ]
+            }
+          }],
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/auth/refresh-token", "host": ["{{baseUrl}}"], "path": ["auth", "refresh-token"] }
+            "url": { "raw": "{{baseUrl}}/auth/refresh-token", "host": ["{{baseUrl}}"], "path": ["auth", "refresh-token"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }]
           }
         },
         {
           "name": "Logout",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Logged out', () => pm.response.json().message.includes('logout') || pm.response.json().message.includes('Logout'));"
+              ]
+            }
+          }],
           "request": {
             "method": "POST",
             "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
@@ -121,7 +162,7 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has data', () => Array.isArray(d.data));",
                 "pm.test('Has pagination', () => d.meta.total > 0);",
                 "if(d.data && d.data.length > 0){ pm.collectionVariables.set('propertyId', d.data[0].id); }"
@@ -130,48 +171,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/properties?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
-          }
-        },
-        {
-          "name": "Get Categories",
-          "event": [{
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Has categories', () => Array.isArray(pm.response.json().data));"
-              ]
-            }
-          }],
-          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/properties/categories", "host": ["{{baseUrl}}"], "path": ["properties", "categories"] } }
-        },
-        {
-          "name": "Filter by Location",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/properties?location=Gulshan&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "location", "value": "Gulshan" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
-          }
-        },
-        {
-          "name": "Filter by Category",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/properties?category=apartment&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "category", "value": "apartment" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
-          }
-        },
-        {
-          "name": "Filter by Price Range",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/properties?minPrice=20000&maxPrice=50000&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "minPrice", "value": "20000" }, { "key": "maxPrice", "value": "50000" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
-          }
-        },
-        {
-          "name": "Search",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/properties?search=studio&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "search", "value": "studio" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
+            "url": { "raw": "{{baseUrl}}/properties?page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
           }
         },
         {
@@ -180,14 +180,98 @@
             "listen": "test",
             "script": {
               "exec": [
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Has property', () => pm.response.json().data.id !== undefined);"
+                "var d = pm.response.json();",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has property', () => d.data.id !== undefined);",
+                "pm.test('Has landlord', () => d.data.landlord !== undefined);"
               ]
             }
           }],
           "request": {
             "method": "GET",
             "url": { "raw": "{{baseUrl}}/properties/{{propertyId}}", "host": ["{{baseUrl}}"], "path": ["properties", "{{propertyId}}"] }
+          }
+        },
+        {
+          "name": "Get Categories",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var d = pm.response.json();",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has categories', () => Array.isArray(d.data));",
+                "pm.test('Has items', () => d.data.length > 0);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/properties/categories", "host": ["{{baseUrl}}"], "path": ["properties", "categories"] }
+          }
+        },
+        {
+          "name": "Filter by Location",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has data', () => Array.isArray(pm.response.json().data));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/properties?location=Dhaka&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "location", "value": "Dhaka" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
+          }
+        },
+        {
+          "name": "Filter by Category",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has data', () => Array.isArray(pm.response.json().data));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/properties?category=apartment&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "category", "value": "apartment" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
+          }
+        },
+        {
+          "name": "Filter by Price",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has data', () => Array.isArray(pm.response.json().data));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/properties?minPrice=20000&maxPrice=50000&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "minPrice", "value": "20000" }, { "key": "maxPrice", "value": "50000" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
+          }
+        },
+        {
+          "name": "Search Properties",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has data', () => Array.isArray(pm.response.json().data));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/properties?search=studio&page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "search", "value": "studio" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] }
           }
         }
       ]
@@ -202,8 +286,10 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 201', () => pm.response.code === 201);",
+                "pm.test('Status 201', () => pm.response.code === 201);",
                 "pm.test('Property created', () => d.data.id !== undefined);",
+                "pm.test('Has title', () => d.data.title !== undefined);",
+                "pm.test('Has price', () => d.data.price > 0);",
                 "if(d.data && d.data.id){ pm.collectionVariables.set('propertyId', d.data.id); }"
               ]
             }
@@ -215,7 +301,7 @@
               { "key": "Content-Type", "value": "application/json" },
               { "key": "Authorization", "value": "Bearer {{landlordToken}}" }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Test Apartment Dhanmondi\",\n  \"description\": \"2 bedroom apartment near lake\",\n  \"price\": 28000,\n  \"location\": \"Dhanmondi, Dhaka\",\n  \"category\": \"apartment\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Luxury Flat in Banani\",\n  \"description\": \"3 bedroom luxury apartment with pool and gym\",\n  \"price\": 65000,\n  \"location\": \"Banani, Dhaka\",\n  \"category\": \"apartment\"\n}" }
           }
         },
         {
@@ -225,7 +311,7 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has properties', () => d.data.length > 0);",
                 "pm.test('Has pagination', () => d.meta !== undefined);"
               ]
@@ -233,7 +319,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/landlord/properties?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["landlord", "properties"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
+            "url": { "raw": "{{baseUrl}}/landlord/properties?page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["landlord", "properties"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] },
             "header": [{ "key": "Authorization", "value": "Bearer {{landlordToken}}" }]
           }
         },
@@ -243,8 +329,10 @@
             "listen": "test",
             "script": {
               "exec": [
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Title updated', () => pm.response.json().data.title === 'Updated Test Apartment');"
+                "var d = pm.response.json();",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Title updated', () => d.data.title === 'Updated Luxury Flat');",
+                "pm.test('Price updated', () => d.data.price === 70000);"
               ]
             }
           }],
@@ -255,7 +343,7 @@
               { "key": "Content-Type", "value": "application/json" },
               { "key": "Authorization", "value": "Bearer {{landlordToken}}" }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Test Apartment\",\n  \"price\": 32000\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Luxury Flat\",\n  \"price\": 70000\n}" }
           }
         },
         {
@@ -264,8 +352,9 @@
             "listen": "test",
             "script": {
               "exec": [
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Deleted', () => pm.response.json().data === null);"
+                "var d = pm.response.json();",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Deleted', () => d.data === null);"
               ]
             }
           }],
@@ -281,14 +370,16 @@
       "name": "04 - Rental Requests",
       "item": [
         {
-          "name": "Create Rental Request (Tenant)",
+          "name": "Create Rental Request",
           "event": [{
             "listen": "test",
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 201', () => pm.response.code === 201);",
-                "pm.test('Status is PENDING', () => d.data.status === 'PENDING');",
+                "pm.test('Status 201', () => pm.response.code === 201);",
+                "pm.test('Status PENDING', () => d.data.status === 'PENDING');",
+                "pm.test('Has property', () => d.data.property !== undefined);",
+                "pm.test('Has tenant', () => d.data.tenant !== undefined);",
                 "if(d.data && d.data.id){ pm.collectionVariables.set('rentalRequestId', d.data.id); }"
               ]
             }
@@ -300,17 +391,17 @@
               { "key": "Content-Type", "value": "application/json" },
               { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"message\": \"I would like to rent this property\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"message\": \"I would like to rent this property for 1 year\"\n}" }
           }
         },
         {
-          "name": "Get My Requests (Tenant)",
+          "name": "Get My Requests",
           "event": [{
             "listen": "test",
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has requests', () => d.data.length > 0);",
                 "pm.test('Has pagination', () => d.meta !== undefined);"
               ]
@@ -328,8 +419,10 @@
             "listen": "test",
             "script": {
               "exec": [
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Has rental request', () => pm.response.json().data.id !== undefined);"
+                "var d = pm.response.json();",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has request', () => d.data.id !== undefined);",
+                "pm.test('Has property info', () => d.data.property !== undefined);"
               ]
             }
           }],
@@ -351,8 +444,9 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has requests', () => d.data.length > 0);",
+                "pm.test('Has pagination', () => d.meta !== undefined);",
                 "var pending = d.data.find(r => r.status === 'PENDING');",
                 "if(pending){ pm.collectionVariables.set('rentalRequestId', pending.id); }"
               ]
@@ -371,8 +465,8 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Status is APPROVED', () => d.data.status === 'APPROVED');"
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Status APPROVED', () => d.data.status === 'APPROVED');"
               ]
             }
           }],
@@ -387,7 +481,28 @@
           }
         },
         {
+          "name": "Reject Request",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/landlord/requests/{{rentalRequestId}}", "host": ["{{baseUrl}}"], "path": ["landlord", "requests", "{{rentalRequestId}}"] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{landlordToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"REJECTED\"\n}" }
+          }
+        },
+        {
           "name": "Get Property Requests",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has data', () => Array.isArray(pm.response.json().data));"
+              ]
+            }
+          }],
           "request": {
             "method": "GET",
             "url": { "raw": "{{baseUrl}}/landlord/properties/{{propertyId}}/requests", "host": ["{{baseUrl}}"], "path": ["landlord", "properties", "{{propertyId}}", "requests"] },
@@ -406,11 +521,12 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 201', () => pm.response.code === 201);",
+                "pm.test('Status 201', () => pm.response.code === 201);",
                 "pm.test('Payment created', () => d.data.payment.id !== undefined);",
                 "pm.test('Has checkout URL', () => d.data.checkoutUrl !== null);",
-                "pm.test('Status is PENDING', () => d.data.payment.status === 'PENDING');",
+                "pm.test('Status PENDING', () => d.data.payment.status === 'PENDING');",
                 "pm.test('Has amount', () => d.data.payment.amount > 0);",
+                "pm.test('Has sessionId', () => d.data.sessionId !== undefined);",
                 "if(d.data && d.data.payment){ pm.collectionVariables.set('paymentId', d.data.payment.id); }"
               ]
             }
@@ -432,9 +548,11 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has payments', () => d.data.length > 0);",
-                "pm.test('Has pagination', () => d.meta !== undefined);"
+                "pm.test('Has pagination', () => d.meta !== undefined);",
+                "pm.test('Has amount', () => d.data[0].amount > 0);",
+                "pm.test('Has status', () => d.data[0].status !== undefined);"
               ]
             }
           }],
@@ -451,10 +569,11 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has payment', () => d.data.id !== undefined);",
                 "pm.test('Has amount', () => d.data.amount > 0);",
-                "pm.test('Has status', () => d.data.status !== undefined);"
+                "pm.test('Has status', () => d.data.status !== undefined);",
+                "pm.test('Has rentalRequest', () => d.data.rentalRequest !== undefined);"
               ]
             }
           }],
@@ -465,16 +584,16 @@
           }
         },
         {
-          "name": "Confirm Payment (Dev)",
+          "name": "DEV - Confirm Payment",
           "event": [{
             "listen": "test",
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Status is PAID', () => d.data.status === 'PAID');",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Status PAID', () => d.data.status === 'PAID');",
                 "pm.test('Has transactionId', () => d.data.transactionId !== null);",
-                "console.log('transactionId: ' + d.data.transactionId);"
+                "console.log('Transaction ID: ' + d.data.transactionId);"
               ]
             }
           }],
@@ -497,9 +616,10 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 201', () => pm.response.code === 201);",
+                "pm.test('Status 201', () => pm.response.code === 201);",
                 "pm.test('Rating is 5', () => d.data.rating === 5);",
-                "pm.test('Has comment', () => d.data.comment !== null);"
+                "pm.test('Has comment', () => d.data.comment !== null);",
+                "pm.test('Has tenant', () => d.data.tenant !== undefined);"
               ]
             }
           }],
@@ -510,7 +630,7 @@
               { "key": "Content-Type", "value": "application/json" },
               { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"rentalRequestId\": \"{{rentalRequestId}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent property, highly recommended!\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"rentalRequestId\": \"{{rentalRequestId}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent property! Highly recommended.\"\n}" }
           }
         },
         {
@@ -520,9 +640,11 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has reviews', () => d.data.length > 0);",
-                "pm.test('Has pagination', () => d.meta !== undefined);"
+                "pm.test('Has pagination', () => d.meta !== undefined);",
+                "pm.test('Has rating', () => d.data[0].rating > 0);",
+                "pm.test('Has comment', () => d.data[0].comment !== null);"
               ]
             }
           }],
@@ -543,9 +665,11 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has users', () => d.data.length > 0);",
-                "pm.test('Has pagination', () => d.meta !== undefined);",
+                "pm.test('Has pagination', () => d.meta.total > 0);",
+                "pm.test('Has role', () => d.data[0].role !== undefined);",
+                "pm.test('Has activeStatus', () => d.data[0].activeStatus !== undefined);",
                 "var u = d.data.find(x => x.role === 'TENANT');",
                 "if(u){ pm.collectionVariables.set('userId', u.id); }"
               ]
@@ -553,7 +677,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/admin/users?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["admin", "users"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }] },
+            "url": { "raw": "{{baseUrl}}/admin/users?page=1&limit=25", "host": ["{{baseUrl}}"], "path": ["admin", "users"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "25" }] },
             "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
           }
         },
@@ -564,8 +688,8 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('User is BLOCKED', () => d.data.activeStatus === 'BLOCKED');"
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('User BLOCKED', () => d.data.activeStatus === 'BLOCKED');"
               ]
             }
           }],
@@ -586,8 +710,8 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('User is ACTIVE', () => d.data.activeStatus === 'ACTIVE');"
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('User ACTIVE', () => d.data.activeStatus === 'ACTIVE');"
               ]
             }
           }],
@@ -602,14 +726,37 @@
           }
         },
         {
+          "name": "Change User Role",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var d = pm.response.json();",
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Role changed', () => d.data.role === 'LANDLORD' || d.data.role === 'TENANT');"
+              ]
+            }
+          }],
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}/role", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}", "role"] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"LANDLORD\"\n}" }
+          }
+        },
+        {
           "name": "Get All Properties",
           "event": [{
             "listen": "test",
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Has properties', () => d.data.length > 0);"
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has properties', () => d.data.length > 0);",
+                "pm.test('Has pagination', () => d.meta.total > 0);"
               ]
             }
           }],
@@ -626,8 +773,9 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
-                "pm.test('Has requests', () => d.data.length > 0);"
+                "pm.test('Status 200', () => pm.response.code === 200);",
+                "pm.test('Has requests', () => d.data.length > 0);",
+                "pm.test('Has pagination', () => d.meta.total > 0);"
               ]
             }
           }],
@@ -644,11 +792,14 @@
             "script": {
               "exec": [
                 "var d = pm.response.json();",
-                "pm.test('Status is 200', () => pm.response.code === 200);",
+                "pm.test('Status 200', () => pm.response.code === 200);",
                 "pm.test('Has users stat', () => d.data.users.total > 0);",
                 "pm.test('Has properties stat', () => d.data.properties.total > 0);",
                 "pm.test('Has rental stat', () => d.data.rentalRequests.total > 0);",
-                "console.log('Users: ' + d.data.users.total + ', Properties: ' + d.data.properties.total + ', Requests: ' + d.data.rentalRequests.total);"
+                "pm.test('Users breakdown', () => d.data.users.landlords > 0 && d.data.users.tenants > 0);",
+                "console.log('Users: ' + d.data.users.total);",
+                "console.log('Properties: ' + d.data.properties.total);",
+                "console.log('Requests: ' + d.data.rentalRequests.total);"
               ]
             }
           }],
@@ -657,13 +808,93 @@
             "url": { "raw": "{{baseUrl}}/admin/statistics", "host": ["{{baseUrl}}"], "path": ["admin", "statistics"] },
             "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
           }
+        }
+      ]
+    },
+    {
+      "name": "09 - Error Tests",
+      "item": [
+        {
+          "name": "No Token - Should Fail",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 401', () => pm.response.code === 401);",
+                "pm.test('Error message', () => pm.response.json().message.includes('token') || pm.response.json().message.includes('Token'));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/my-profile", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] }
+          }
         },
         {
-          "name": "Delete Property",
+          "name": "Invalid Token - Should Fail",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 401', () => pm.response.code === 401);",
+                "pm.test('Error message', () => pm.response.json().message.includes('Invalid') || pm.response.json().message.includes('invalid'));"
+              ]
+            }
+          }],
           "request": {
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/admin/properties/{{propertyId}}", "host": ["{{baseUrl}}"], "path": ["admin", "properties", "{{propertyId}}"] },
-            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/my-profile", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] },
+            "header": [{ "key": "Authorization", "value": "Bearer invalidtoken123" }]
+          }
+        },
+        {
+          "name": "Wrong Role - Should Fail",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 403', () => pm.response.code === 403);",
+                "pm.test('Forbidden', () => pm.response.json().message.includes('Forbidden') || pm.response.json().message.includes('forbidden'));"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/admin/users", "host": ["{{baseUrl}}"], "path": ["admin", "users"] },
+            "header": [{ "key": "Authorization", "value": "Bearer {{tenantToken}}" }]
+          }
+        },
+        {
+          "name": "Wrong Password - Should Fail",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 401 or 500', () => pm.response.code === 401 || pm.response.code === 500);",
+                "pm.test('Error message', () => pm.response.json().success === false);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@rentnest.com\",\n  \"password\": \"wrongpassword\"\n}" }
+          }
+        },
+        {
+          "name": "Non-existent Route - Should 404",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 404', () => pm.response.code === 404);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/nonexistent", "host": ["{{baseUrl}}"], "path": ["nonexistent"] }
           }
         }
       ]
