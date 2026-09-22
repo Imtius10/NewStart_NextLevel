@@ -223,6 +223,245 @@ const getMyPayments = async (
   });
 };
 
+
+const getPaymentById = async (
+  paymentId: string,
+  tenantId: string
+) => {
+  const payment =
+    await prisma.payment.findUnique({
+      where: {
+        id: paymentId,
+      },
+
+      include: {
+        rentalRequest: {
+          include: {
+            property: true,
+          },
+        },
+      },
+    });
+
+  if (!payment) {
+    throw new Error("Payment not found");
+  }
+
+  /**
+   * Tenant can only see their own payment.
+   */
+  if (
+    payment.tenantId !== tenantId
+  ) {
+    throw new Error(
+      "You are not allowed to view this payment"
+    );
+  }
+
+  return payment;
+};
+
+
+const handleStripeWebhook = async (
+  event: Stripe.Event
+) => {
+  switch (event.type) {
+    /**
+     * --------------------------------------------------------
+     * CHECKOUT COMPLETED
+     * --------------------------------------------------------
+     */
+    case "checkout.session.completed": {
+      const session =
+        event.data.object as Stripe.Checkout.Session;
+
+      const paymentId =
+        session.metadata?.paymentId;
+
+      const rentalRequestId =
+        session.metadata?.rentalRequestId;
+
+      const tenantId =
+        session.metadata?.tenantId;
+
+      /**
+       * Metadata validation
+       */
+      if (
+        !paymentId ||
+        !rentalRequestId ||
+        !tenantId
+      ) {
+        throw new Error(
+          "Stripe payment metadata is missing"
+        );
+      }
+
+      /**
+       * Make sure Stripe says the payment
+       * was actually paid.
+       */
+      if (
+        session.payment_status !== "paid"
+      ) {
+        return;
+      }
+
+      /**
+       * Stripe PaymentIntent ID
+       */
+      const transactionId =
+        typeof session.payment_intent ===
+        "string"
+          ? session.payment_intent
+          : null;
+
+      /**
+       * ------------------------------------------------------
+       * DATABASE TRANSACTION
+       * ------------------------------------------------------
+       */
+      await prisma.$transaction(
+        async (tx:Prisma.TransactionClien) => {
+          /**
+           * Find payment
+           */
+          const payment =
+            await tx.payment.findUnique({
+              where: {
+                id: paymentId,
+              },
+            });
+
+          if (!payment) {
+            throw new Error(
+              "Payment record not found"
+            );
+          }
+
+          /**
+           * Verify rental request
+           */
+          if (
+            payment.rentalRequestId !==
+            rentalRequestId
+          ) {
+            throw new Error(
+              "Payment rental request mismatch"
+            );
+          }
+
+          /**
+           * Verify tenant
+           */
+          if (
+            payment.tenantId !== tenantId
+          ) {
+            throw new Error(
+              "Payment tenant mismatch"
+            );
+          }
+
+          /**
+           * Idempotency
+           *
+           * Stripe can retry the same webhook.
+           *
+           * If already PAID, do nothing.
+           */
+          if (
+            payment.status ===
+            PaymentStatus.PAID
+          ) {
+            return;
+          }
+
+          /**
+           * Update payment atomically.
+           */
+          await tx.payment.update({
+            where: {
+              id: paymentId,
+            },
+
+            data: {
+              status:
+                PaymentStatus.PAID,
+
+              transactionId,
+            },
+          });
+        }
+      );
+
+      break;
+    }
+
+    /**
+     * --------------------------------------------------------
+     * CHECKOUT EXPIRED
+     * --------------------------------------------------------
+     */
+    case "checkout.session.expired": {
+      const session =
+        event.data.object as Stripe.Checkout.Session;
+
+      const paymentId =
+        session.metadata?.paymentId;
+
+      if (!paymentId) {
+        return;
+      }
+
+      /**
+       * Database transaction
+       */
+      await prisma.$transaction(
+        async (tx:Prisma.TransactionClien) => {
+          const payment =
+            await tx.payment.findUnique({
+              where: {
+                id: paymentId,
+              },
+            });
+
+          /**
+           * Payment might have been deleted.
+           */
+          if (!payment) {
+            return;
+          }
+
+          /**
+           * Never change PAID → CANCELLED.
+           */
+          if (
+            payment.status ===
+            PaymentStatus.PAID
+          ) {
+            return;
+          }
+
+          await tx.payment.update({
+            where: {
+              id: paymentId,
+            },
+
+            data: {
+              status:
+                PaymentStatus.CANCELLED,
+            },
+          });
+        }
+      );
+
+      break;
+    }
+
+    default:
+      break;
+  }
+};
 /**
  * ============================================================
  * GET PAYMENT BY ID
@@ -233,5 +472,7 @@ const getMyPayments = async (
 export const paymentService = {
     createPayment,
     getMyPayments,
+    getPaymentById,
+    handleStripeWebhook
   
 };
