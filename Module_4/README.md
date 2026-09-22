@@ -240,6 +240,4 @@ npm start
 - `refactor:` — code improvements
 - `chore:` — maintenance
 
-## License
 
-MIT
