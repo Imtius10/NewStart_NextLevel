@@ -10,17 +10,21 @@ model Payment {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  rentalRequest   RentalRequest @relation(
-    fields: [rentalRequestId],
-    references: [id],
-    onDelete: Cascade
-  )
 
-  tenant          User          @relation(
-    fields: [tenantId],
-    references: [id],
-    onDelete: Cascade
-  )
+rentalRequest RentalRequest @relation(fields: [rentalRequestId],references: [id],onDelete: Cascade)
+
+tenant User @relation(fields: [tenantId],references: [id],onDelete: Cascade)
+//   rentalRequest   RentalRequest @relation(
+//     fields: [rentalRequestId],
+//     references: [id],
+//     onDelete: Cascade
+//   )
+
+//   tenant          User          @relation(
+//     fields: [tenantId],
+//     references: [id],
+//     onDelete: Cascade
+//   )
 
   @@index([tenantId])
   @@index([status])
