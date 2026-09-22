@@ -1,21 +1,16 @@
 {
   "version": 2,
-  "installCommand": "npm install && npx prisma generate",
+  "installCommand": "npm install && npx prisma generate && npx esbuild api/index.ts --bundle --platform=node --target=node20 --outfile=api/index.js --format=cjs",
   "builds": [
     {
-      "src": "api/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "src/**",
-          "generated/**",
-          "node_modules/.prisma/**",
-          "node_modules/@prisma/**"
-        ]
-      }
+      "src": "api/index.js",
+      "use": "@vercel/node"
     }
   ],
-  "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/api" }
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.js"
+    }
   ]
 }
