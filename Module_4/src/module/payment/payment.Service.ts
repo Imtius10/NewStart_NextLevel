@@ -1,10 +1,10 @@
 import Stripe from "stripe";
-import { prisma } from "../../lib/prisma";
 import {
-  PaymentStatus,
-  RentalStatus,
-  Prisma,
+    PaymentStatus,
+    Prisma,
+    RentalStatus,
 } from "../../../generated/prisma/client";
+import { prisma } from "../../lib/prisma";
 
 const stripe = new Stripe(
   process.env.STRIPE_SECRET_KEY as string
@@ -17,7 +17,7 @@ const createPayment = async (
 ) => {
   
   const paymentData = await prisma.$transaction(
-    async (tx:Prisma.TransactionClien) => {
+    async (tx:Prisma.TransactionClient) => {
      
       const rentalRequest =
         await tx.rentalRequest.findUnique({
@@ -195,32 +195,52 @@ const createPayment = async (
 
 
 const getMyPayments = async (
-  tenantId: string
+  tenantId: string,
+  page: number = 1,
+  limit: number = 10
 ) => {
-  return prisma.payment.findMany({
-    where: {
-      tenantId,
-    },
+  const pageNum = Math.max(1, page);
+  const limitNum = Math.min(50, Math.max(1, limit));
+  const skip = (pageNum - 1) * limitNum;
 
-    include: {
-      rentalRequest: {
-        include: {
-          property: {
-            select: {
-              id: true,
-              title: true,
-              location: true,
-              price: true,
+  const [data, total] = await Promise.all([
+    prisma.payment.findMany({
+      where: {
+        tenantId,
+      },
+      include: {
+        rentalRequest: {
+          include: {
+            property: {
+              select: {
+                id: true,
+                title: true,
+                location: true,
+                price: true,
+              },
             },
           },
         },
       },
-    },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limitNum,
+    }),
+    prisma.payment.count({
+      where: { tenantId },
+    }),
+  ]);
 
-    orderBy: {
-      createdAt: "desc",
+  return {
+    data,
+    meta: {
+      page: pageNum,
+      limit: limitNum,
+      total,
     },
-  });
+  };
 };
 
 
@@ -322,7 +342,7 @@ const handleStripeWebhook = async (
        * ------------------------------------------------------
        */
       await prisma.$transaction(
-        async (tx:Prisma.TransactionClien) => {
+        async (tx:Prisma.TransactionClient) => {
           /**
            * Find payment
            */
@@ -417,7 +437,7 @@ const handleStripeWebhook = async (
        * Database transaction
        */
       await prisma.$transaction(
-        async (tx:Prisma.TransactionClien) => {
+        async (tx:Prisma.TransactionClient) => {
           const payment =
             await tx.payment.findUnique({
               where: {
