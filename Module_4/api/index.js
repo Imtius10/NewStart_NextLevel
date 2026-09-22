@@ -36125,7 +36125,7 @@ router.post("/register", userController.userRegister);
 router.post("/login", userController.userLogin);
 router.post("/refresh-token", userController.refreshToken);
 router.post("/logout", userController.logout);
-router.get("/my-profile", auth(), userController.getMyProfile);
+router.get("/me", auth(), userController.getMyProfile);
 var userRouter = router;
 
 // src/module/properties/properties.routes.ts
@@ -36441,21 +36441,6 @@ var propertyController = {
 
 // src/module/properties/properties.routes.ts
 var router2 = (0, import_express2.Router)();
-router2.post(
-  "/",
-  auth(UserRole.LANDLORD),
-  propertyController.createProperty
-);
-router2.put(
-  "/:id",
-  auth(UserRole.LANDLORD),
-  propertyController.updateProperty
-);
-router2.delete(
-  "/:id",
-  auth(UserRole.LANDLORD),
-  propertyController.deleteProperty
-);
 router2.get("/categories", propertyController.getCategories);
 router2.get("/", propertyController.getAllProperties);
 router2.get(
@@ -36682,7 +36667,7 @@ router3.post(
   rentalRequestController.createRentalRequest
 );
 router3.get(
-  "/my-requests",
+  "/",
   auth(UserRole.TENANT),
   rentalRequestController.getMyRentalRequests
 );
@@ -36977,15 +36962,20 @@ var landlordController = {
 
 // src/module/landlord/landlord.routes.ts
 var router4 = (0, import_express4.Router)();
-router4.get(
-  "/requests",
+router4.post(
+  "/properties",
   auth(UserRole.LANDLORD),
-  landlordController.getMyRentalRequests
+  propertyController.createProperty
 );
-router4.patch(
-  "/requests/:id",
+router4.put(
+  "/properties/:id",
   auth(UserRole.LANDLORD),
-  landlordController.updateRentalRequestStatus
+  propertyController.updateProperty
+);
+router4.delete(
+  "/properties/:id",
+  auth(UserRole.LANDLORD),
+  propertyController.deleteProperty
 );
 router4.get(
   "/properties",
@@ -36996,6 +36986,16 @@ router4.get(
   "/properties/:propertyId/requests",
   auth(UserRole.LANDLORD),
   landlordController.getPropertyRequests
+);
+router4.get(
+  "/requests",
+  auth(UserRole.LANDLORD),
+  landlordController.getMyRentalRequests
+);
+router4.patch(
+  "/requests/:id",
+  auth(UserRole.LANDLORD),
+  landlordController.updateRentalRequestStatus
 );
 var landlordRouter = router4;
 
@@ -37413,7 +37413,7 @@ router5.delete(
   adminController.deleteProperty
 );
 router5.get(
-  "/rental-requests",
+  "/rentals",
   auth(UserRole.ADMIN),
   adminController.getAllRentalRequests
 );
@@ -55876,7 +55876,7 @@ router7.post(
   paymentController.createPayment
 );
 router7.get(
-  "/my-payments",
+  "/",
   auth(UserRole.TENANT),
   paymentController.getMyPayments
 );
@@ -55886,7 +55886,7 @@ router7.get(
   paymentController.getPaymentById
 );
 router7.post(
-  "/test-confirm",
+  "/confirm",
   paymentController.testConfirmPayment
 );
 var paymentRouter = router7;
@@ -55971,6 +55971,10 @@ app.use(
 );
 app.use(
   "/api/properties",
+  propertyRouter
+);
+app.use(
+  "/api/categories",
   propertyRouter
 );
 app.use(
