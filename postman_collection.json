@@ -32,6 +32,10 @@
     {
       "key": "paymentId",
       "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
     }
   ],
   "item": [
@@ -39,89 +43,7 @@
       "name": "Auth",
       "item": [
         {
-          "name": "Register Tenant",
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/auth/register",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Test Tenant\",\n  \"email\": \"tenant@test.com\",\n  \"password\": \"123456\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Register Landlord",
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/auth/register",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Test Landlord\",\n  \"email\": \"landlord@test.com\",\n  \"password\": \"123456\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login Tenant",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if(jsonData.data && jsonData.data.accessToken){",
-                  "  pm.collectionVariables.set('tenantToken', jsonData.data.accessToken);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/auth/login",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"tenant@test.com\",\n  \"password\": \"123456\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login Landlord",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if(jsonData.data && jsonData.data.accessToken){",
-                  "  pm.collectionVariables.set('landlordToken', jsonData.data.accessToken);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/auth/login",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"landlord@test.com\",\n  \"password\": \"123456\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login Admin",
+          "name": "Login Admin (imtius3)",
           "event": [
             {
               "listen": "test",
@@ -130,6 +52,7 @@
                   "var jsonData = pm.response.json();",
                   "if(jsonData.data && jsonData.data.accessToken){",
                   "  pm.collectionVariables.set('adminToken', jsonData.data.accessToken);",
+                  "  console.log('Admin token saved');",
                   "}"
                 ]
               }
@@ -143,7 +66,63 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@rentnest.com\",\n  \"password\": \"admin123\"\n}"
+              "raw": "{\n  \"email\": \"imtius3@example.com\",\n  \"password\": \"12345678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Landlord (imtius1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.accessToken){",
+                  "  pm.collectionVariables.set('landlordToken', jsonData.data.accessToken);",
+                  "  console.log('Landlord token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"imtius1@example.com\",\n  \"password\": \"12345678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Tenant (tanvir)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.accessToken){",
+                  "  pm.collectionVariables.set('tenantToken', jsonData.data.accessToken);",
+                  "  console.log('Tenant token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tanvir@tenant.com\",\n  \"password\": \"123456\"\n}"
             }
           }
         },
@@ -151,34 +130,18 @@
           "name": "Refresh Token",
           "request": {
             "method": "POST",
-            "url": "{{baseUrl}}/auth/refresh-token",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ]
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "pm.request.headers.add({key: 'Cookie', value: 'refreshToken=' + pm.collectionVariables.get('refreshToken')});"
-                ]
-              }
-            }
-          ]
+            "url": "{{baseUrl}}/auth/refresh-token"
+          }
         },
         {
           "name": "Logout",
           "request": {
             "method": "POST",
-            "url": "{{baseUrl}}/auth/logout",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ]
+            "url": "{{baseUrl}}/auth/logout"
           }
         },
         {
-          "name": "Get My Profile",
+          "name": "Get My Profile (Tenant)",
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/auth/my-profile",
@@ -190,36 +153,8 @@
       ]
     },
     {
-      "name": "Properties",
+      "name": "Properties (Public)",
       "item": [
-        {
-          "name": "Create Property (Landlord)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if(jsonData.data && jsonData.data.id){",
-                  "  pm.collectionVariables.set('propertyId', jsonData.data.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/properties",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{landlordToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Beautiful Apartment\",\n  \"description\": \"2 bed apartment in downtown\",\n  \"price\": 25000,\n  \"location\": \"Dhaka\",\n  \"category\": \"apartment\"\n}"
-            }
-          }
-        },
         {
           "name": "Get All Properties",
           "request": {
@@ -236,18 +171,15 @@
           }
         },
         {
-          "name": "Get Properties with Filters",
+          "name": "Search by Location",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/properties?location=Dhaka&category=apartment&minPrice=10000&maxPrice=50000&page=1&limit=10",
+              "raw": "{{baseUrl}}/properties?location=Gulshan&page=1&limit=10",
               "host": ["{{baseUrl}}"],
               "path": ["properties"],
               "query": [
-                { "key": "location", "value": "Dhaka" },
-                { "key": "category", "value": "apartment" },
-                { "key": "minPrice", "value": "10000" },
-                { "key": "maxPrice", "value": "50000" },
+                { "key": "location", "value": "Gulshan" },
                 { "key": "page", "value": "1" },
                 { "key": "limit", "value": "10" }
               ]
@@ -255,10 +187,36 @@
           }
         },
         {
-          "name": "Get Property by ID",
+          "name": "Filter by Category",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/properties/{{propertyId}}"
+            "url": {
+              "raw": "{{baseUrl}}/properties?category=apartment&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties"],
+              "query": [
+                { "key": "category", "value": "apartment" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter by Price Range",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties?minPrice=20000&maxPrice=50000&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties"],
+              "query": [
+                { "key": "minPrice", "value": "20000" },
+                { "key": "maxPrice", "value": "50000" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
           }
         },
         {
@@ -269,7 +227,80 @@
           }
         },
         {
-          "name": "Update Property (Landlord)",
+          "name": "Get Property by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/properties/{{propertyId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Landlord - Properties",
+      "item": [
+        {
+          "name": "Get My Properties",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.length > 0){",
+                  "  pm.collectionVariables.set('propertyId', jsonData.data[0].id);",
+                  "  console.log('First property ID saved: ' + jsonData.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/landlord/properties?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["landlord", "properties"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{landlordToken}}" }
+            ]
+          }
+        },
+        {
+          "name": "Create Property",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.id){",
+                  "  pm.collectionVariables.set('propertyId', jsonData.data.id);",
+                  "  console.log('Property ID saved: ' + jsonData.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/properties",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{landlordToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Test Property\",\n  \"description\": \"A test property for demo\",\n  \"price\": 25000,\n  \"location\": \"Gulshan, Dhaka\",\n  \"category\": \"apartment\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Property",
           "request": {
             "method": "PUT",
             "url": "{{baseUrl}}/properties/{{propertyId}}",
@@ -279,12 +310,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated Apartment Title\",\n  \"price\": 30000\n}"
+              "raw": "{\n  \"title\": \"Updated Property Title\",\n  \"price\": 30000\n}"
             }
           }
         },
         {
-          "name": "Delete Property (Landlord)",
+          "name": "Delete Property",
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/properties/{{propertyId}}",
@@ -296,71 +327,24 @@
       ]
     },
     {
-      "name": "Rental Requests",
+      "name": "Landlord - Rental Requests",
       "item": [
         {
-          "name": "Create Rental Request (Tenant)",
+          "name": "Get My Rental Requests",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
-                  "if(jsonData.data && jsonData.data.id){",
-                  "  pm.collectionVariables.set('rentalRequestId', jsonData.data.id);",
+                  "if(jsonData.data && jsonData.data.length > 0){",
+                  "  pm.collectionVariables.set('rentalRequestId', jsonData.data[0].id);",
+                  "  console.log('Rental Request ID saved: ' + jsonData.data[0].id);",
                   "}"
                 ]
               }
             }
           ],
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/rentals",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"message\": \"I would like to rent this property\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Get My Rental Requests (Tenant)",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/rentals/my-requests?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["rentals", "my-requests"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" }
-              ]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Rental Request by ID (Tenant)",
-          "request": {
-            "method": "GET",
-            "url": "{{baseUrl}}/rentals/{{rentalRequestId}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Landlord",
-      "item": [
-        {
-          "name": "Get My Rental Requests (Landlord)",
           "request": {
             "method": "GET",
             "url": {
@@ -408,25 +392,7 @@
           }
         },
         {
-          "name": "Get My Properties (Landlord)",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/landlord/properties?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["landlord", "properties"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" }
-              ]
-            },
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{landlordToken}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Property Requests (Landlord)",
+          "name": "Get Property Requests",
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/landlord/properties/{{propertyId}}/requests",
@@ -438,10 +404,88 @@
       ]
     },
     {
-      "name": "Payments",
+      "name": "Tenant - Rental Requests",
       "item": [
         {
-          "name": "Create Payment (Tenant)",
+          "name": "Create Rental Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.id){",
+                  "  pm.collectionVariables.set('rentalRequestId', jsonData.data.id);",
+                  "  console.log('Rental Request ID saved: ' + jsonData.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/rentals",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"message\": \"I would like to rent this property\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Rental Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.length > 0){",
+                  "  var pending = jsonData.data.find(r => r.status === 'PENDING' || r.status === 'APPROVED');",
+                  "  if(pending){",
+                  "    pm.collectionVariables.set('rentalRequestId', pending.id);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/rentals/my-requests?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["rentals", "my-requests"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
+            ]
+          }
+        },
+        {
+          "name": "Get Rental Request by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/rentals/{{rentalRequestId}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantToken}}" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tenant - Payments",
+      "item": [
+        {
+          "name": "Create Payment (Stripe Checkout)",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/payments/create",
@@ -456,7 +500,21 @@
           }
         },
         {
-          "name": "Get My Payments (Tenant)",
+          "name": "Get My Payments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.length > 0){",
+                  "  pm.collectionVariables.set('paymentId', jsonData.data[0].id);",
+                  "  console.log('Payment ID saved: ' + jsonData.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "url": {
@@ -474,7 +532,7 @@
           }
         },
         {
-          "name": "Get Payment by ID (Tenant)",
+          "name": "Get Payment by ID",
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/payments/{{paymentId}}",
@@ -486,10 +544,10 @@
       ]
     },
     {
-      "name": "Reviews",
+      "name": "Tenant - Reviews",
       "item": [
         {
-          "name": "Create Review (Tenant)",
+          "name": "Create Review",
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/reviews",
@@ -499,7 +557,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rentalRequestId\": \"{{rentalRequestId}}\",\n  \"rating\": 5,\n  \"comment\": \"Great property!\"\n}"
+              "raw": "{\n  \"rentalRequestId\": \"{{rentalRequestId}}\",\n  \"rating\": 5,\n  \"comment\": \"Great property, highly recommended!\"\n}"
             }
           }
         },
@@ -525,15 +583,32 @@
       "item": [
         {
           "name": "Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.length > 0){",
+                  "  var tenant = jsonData.data.find(u => u.role === 'TENANT');",
+                  "  if(tenant){",
+                  "    pm.collectionVariables.set('userId', tenant.id);",
+                  "    console.log('User ID saved: ' + tenant.id);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/admin/users?page=1&limit=10",
+              "raw": "{{baseUrl}}/admin/users?page=1&limit=20",
               "host": ["{{baseUrl}}"],
               "path": ["admin", "users"],
               "query": [
                 { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" }
+                { "key": "limit", "value": "20" }
               ]
             },
             "header": [
