@@ -7,8 +7,12 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "stripe:webhook": "stripe listen --events checkout.session.completed --forward-to localhost:5000/api/subscription/webhook",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "stripe:webhook": "stripe listen --events checkout.session.completed --forward-to localhost:5000/api/payments/webhook",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "type": "module",
@@ -26,7 +30,6 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
-    "@types/cookie-parser": "^1.4.10",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
