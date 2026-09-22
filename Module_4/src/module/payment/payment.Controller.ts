@@ -102,34 +102,8 @@ const getPaymentById = catchAsync(
   }
 );
 
-/**
- * ============================================================
- * TEST: Confirm Payment (simulate Stripe webhook)
- * ============================================================
- */
-const testConfirmPayment = catchAsync(
-  async (req: Request, res: Response) => {
-    const { paymentId } = req.body;
-
-    if (!paymentId) {
-      throw new Error("Payment ID is required");
-    }
-
-    const result =
-      await paymentService.testConfirmPayment(paymentId);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Payment confirmed successfully (test mode)",
-      data: result,
-    });
-  }
-);
-
 export const paymentController = {
   createPayment,
   getMyPayments,
   getPaymentById,
-  testConfirmPayment,
 };

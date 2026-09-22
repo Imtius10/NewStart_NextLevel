@@ -484,44 +484,6 @@ const handleStripeWebhook = async (
 };
 
 /**
- * TEST ENDPOINT: Simulate Stripe webhook confirmation
- * For development/testing only - marks payment as PAID
- */
-const testConfirmPayment = async (paymentId: string) => {
-  const payment = await prisma.payment.findUnique({
-    where: { id: paymentId },
-    include: {
-      rentalRequest: {
-        select: { id: true, status: true },
-      },
-    },
-  });
-
-  if (!payment) {
-    throw new Error("Payment not found");
-  }
-
-  if (payment.status === PaymentStatus.PAID) {
-    throw new Error("Payment already confirmed");
-  }
-
-  if (payment.rentalRequest.status !== RentalStatus.APPROVED) {
-    throw new Error("Rental request must be APPROVED before payment");
-  }
-
-  const updatedPayment = await prisma.payment.update({
-    where: { id: paymentId },
-    data: {
-      status: PaymentStatus.PAID,
-      transactionId: `test_tx_${Date.now()}`,
-    },
-  });
-
-  return updatedPayment;
-};
-
-
-/**
  * ============================================================
  * GET PAYMENT BY ID
  * ============================================================
@@ -532,6 +494,5 @@ export const paymentService = {
     createPayment,
     getMyPayments,
     getPaymentById,
-    handleStripeWebhook,
-    testConfirmPayment
+    handleStripeWebhook
 };

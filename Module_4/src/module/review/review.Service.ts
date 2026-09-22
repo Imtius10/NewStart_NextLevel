@@ -26,7 +26,7 @@ const createReview = async (data: CreateReviewData) => {
     where: {
       id: rentalRequestId,
     },
-    include: {
+      include: {
       property: {
         select: {
           id: true,
@@ -34,7 +34,7 @@ const createReview = async (data: CreateReviewData) => {
           location: true,
         },
       },
-      review: true,
+      reviews: true,
     },
   });
 
@@ -57,7 +57,7 @@ const createReview = async (data: CreateReviewData) => {
   }
 
   // Prevent duplicate review
-  if (rentalRequest.review) {
+  if (rentalRequest.reviews && rentalRequest.reviews.length > 0) {
     throw new Error(
       "You have already reviewed this rental"
     );
