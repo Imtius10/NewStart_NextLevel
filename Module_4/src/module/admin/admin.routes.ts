@@ -38,7 +38,7 @@ router.delete(
 );
 
 router.get(
-  "/rental-requests",
+  "/rentals",
   auth(UserRole.ADMIN),
   adminController.getAllRentalRequests
 );

@@ -18,7 +18,7 @@ router.post(
 
 // Tenant gets own rental requests
 router.get(
-  "/my-requests",
+  "/",
   auth(UserRole.TENANT),
   rentalRequestController.getMyRentalRequests
 );

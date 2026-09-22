@@ -71,6 +71,11 @@ app.use(
 );
 
 app.use(
+  "/api/categories",
+  propertyRouter
+);
+
+app.use(
   "/api/rentals",
   rentalRequestRouter
 );

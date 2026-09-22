@@ -113,7 +113,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/auth/my-profile", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] },
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] },
             "header": [{ "key": "Authorization", "value": "Bearer {{tenantToken}}" }]
           }
         },
@@ -207,7 +207,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/properties/categories", "host": ["{{baseUrl}}"], "path": ["properties", "categories"] }
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["properties", "categories"] }
           }
         },
         {
@@ -409,7 +409,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/rentals/my-requests?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["rentals", "my-requests"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
+            "url": { "raw": "{{baseUrl}}/rentals?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["rentals", "my-requests"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
             "header": [{ "key": "Authorization", "value": "Bearer {{tenantToken}}" }]
           }
         },
@@ -558,7 +558,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/payments/my-payments?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["payments", "my-payments"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
+            "url": { "raw": "{{baseUrl}}/payments?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["payments", "my-payments"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
             "header": [{ "key": "Authorization", "value": "Bearer {{tenantToken}}" }]
           }
         },
@@ -599,7 +599,7 @@
           }],
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/payments/test-confirm", "host": ["{{baseUrl}}"], "path": ["payments", "test-confirm"] },
+            "url": { "raw": "{{baseUrl}}/payments/confirm", "host": ["{{baseUrl}}"], "path": ["payments", "test-confirm"] },
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\n  \"paymentId\": \"{{paymentId}}\"\n}" }
           }
@@ -781,7 +781,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/admin/rental-requests?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["admin", "rental-requests"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
+            "url": { "raw": "{{baseUrl}}/admin/rentals?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["admin", "rental-requests"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
             "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
           }
         },
@@ -827,7 +827,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/auth/my-profile", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] }
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] }
           }
         },
         {
@@ -843,7 +843,7 @@
           }],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/auth/my-profile", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] },
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "my-profile"] },
             "header": [{ "key": "Authorization", "value": "Bearer invalidtoken123" }]
           }
         },

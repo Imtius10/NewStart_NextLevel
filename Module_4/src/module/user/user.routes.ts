@@ -17,7 +17,7 @@ router.post("/refresh-token", userController.refreshToken);
 
 router.post("/logout", userController.logout);
 
-router.get("/my-profile", auth(), userController.getMyProfile);
+router.get("/me", auth(), userController.getMyProfile);
 
 
 

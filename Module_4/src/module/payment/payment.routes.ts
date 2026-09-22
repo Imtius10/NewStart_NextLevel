@@ -20,7 +20,7 @@ router.post(
  * Tenant payment history
  */
 router.get(
-  "/my-payments",
+  "/",
   auth(UserRole.TENANT),
   paymentController.getMyPayments
 );
@@ -38,7 +38,7 @@ router.get(
  * DEV: Confirm payment (simulates Stripe webhook)
  */
 router.post(
-  "/test-confirm",
+  "/confirm",
   paymentController.testConfirmPayment
 );
 
