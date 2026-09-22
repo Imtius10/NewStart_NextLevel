@@ -193,14 +193,45 @@ const createPayment = async (
   };
 };
 
+
+const getMyPayments = async (
+  tenantId: string
+) => {
+  return prisma.payment.findMany({
+    where: {
+      tenantId,
+    },
+
+    include: {
+      rentalRequest: {
+        include: {
+          property: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              price: true,
+            },
+          },
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 /**
  * ============================================================
- * GET MY PAYMENTS
+ * GET PAYMENT BY ID
  * ============================================================
  */
 
 
 export const paymentService = {
-  createPayment,
+    createPayment,
+    getMyPayments,
   
 };
