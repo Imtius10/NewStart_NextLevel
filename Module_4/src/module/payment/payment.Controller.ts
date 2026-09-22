@@ -1,0 +1,103 @@
+import { Request, Response } from "express";
+import httpStatus from "http-status";
+
+import catchAsync from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
+import { paymentService } from "./payment.Service";
+
+/**
+ * ============================================================
+ * CREATE PAYMENT
+ * ============================================================
+ */
+const createPayment = catchAsync(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const { rentalRequestId } =
+      req.body;
+
+    if (!rentalRequestId) {
+      throw new Error(
+        "Rental request ID is required"
+      );
+    }
+
+    const result =
+      await paymentService.createPayment(
+        rentalRequestId,
+        req.user.id
+      );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message:
+        "Payment session created successfully",
+      data: result,
+    });
+  }
+);
+
+/**
+ * ============================================================
+ * GET MY PAYMENTS
+ * ============================================================
+ */
+const getMyPayments = catchAsync(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const payments =
+      await paymentService.getMyPayments(
+        req.user.id
+      );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message:
+        "Payment history retrieved successfully",
+      data: payments,
+    });
+  }
+);
+
+/**
+ * ============================================================
+ * GET PAYMENT BY ID
+ * ============================================================
+ */
+const getPaymentById = catchAsync(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const { id } = req.params;
+
+    const payment =
+      await paymentService.getPaymentById(
+        id as string,
+        req.user.id
+      );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message:
+        "Payment retrieved successfully",
+      data: payment,
+    });
+  }
+);
+
+export const paymentController = {
+  createPayment,
+  getMyPayments,
+  getPaymentById,
+};
