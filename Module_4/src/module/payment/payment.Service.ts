@@ -323,6 +323,9 @@ const handleStripeWebhook = async (
 
       await prisma.$transaction(
         async (tx: Prisma.TransactionClient) => {
+          /**
+           * Find payment
+           */
           const payment =
             await tx.payment.findUnique({
               where: { id: paymentId },
