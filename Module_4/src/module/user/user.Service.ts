@@ -118,9 +118,54 @@ const getMyProfile = async (userId: string) => {
 }
 
 
+const refreshToken = async (refreshTokenValue: string) => {
+    const { verifyToken } = await import("../../utils/jwtUtils");
+
+    const verified = verifyToken(refreshTokenValue, "refresh");
+
+    if (!verified.success) {
+        throw new GlobalError(
+            httpStatus.UNAUTHORIZED,
+            "Invalid or expired refresh token"
+        );
+    }
+
+    const decoded = verified.data as { userId: string };
+
+    const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+    });
+
+    if (!user) {
+        throw new GlobalError(
+            httpStatus.NOT_FOUND,
+            "User not found"
+        );
+    }
+
+    if (user.activeStatus === "BLOCKED") {
+        throw new GlobalError(
+            httpStatus.FORBIDDEN,
+            "Your account has been blocked"
+        );
+    }
+
+    const jwtPayload = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+    };
+
+    const newAccessToken = createToken(jwtPayload, "access");
+
+    return { accessToken: newAccessToken };
+}
+
 
 export const userService = {
     userRegisterDB,
     LoginUserDB,
-    getMyProfile
+    getMyProfile,
+    refreshToken
 }
