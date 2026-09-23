@@ -4,7 +4,7 @@ A full-stack rental property marketplace backend built with Node.js, Express, Ty
 
 ## Live Demo
 
-- **API Base URL:** https://rent-nest-api-seven.vercel.app/api
+- **API Base URL:** https://rent-nest-api-seven.vercel.app
 - **Database:** Neon PostgreSQL (free tier)
 
 
