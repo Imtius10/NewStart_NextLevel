@@ -271,6 +271,4 @@ npx vercel --prod
 - `refactor:` — code improvements
 - `chore:` — maintenance
 
-## License
 
-MIT
