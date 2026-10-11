@@ -41,7 +41,10 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: (process.env.CORS_ORIGIN || "http://localhost:3000")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
     credentials: true,
   })
 );
