@@ -12,6 +12,8 @@ const createProperty = catchAsync(
       price,
       location,
       category,
+      imageUrl,
+      isAvailable,
     } = req.body;
 
     if (!req.user) {
@@ -24,6 +26,11 @@ const createProperty = catchAsync(
       price: Number(price),
       location,
       category,
+      imageUrl: imageUrl || undefined,
+      isAvailable:
+        typeof isAvailable === "boolean"
+          ? isAvailable
+          : undefined,
       landlordId: req.user.id,
     });
 
@@ -81,6 +88,8 @@ const updateProperty = catchAsync(
       price,
       location,
       category,
+      imageUrl,
+      isAvailable,
     } = req.body;
 
     const property = await propertyService.updateProperty(
@@ -95,6 +104,11 @@ const updateProperty = catchAsync(
             : undefined,
         location,
         category,
+        imageUrl,
+        isAvailable:
+          typeof isAvailable === "boolean"
+            ? isAvailable
+            : undefined,
       }
     );
 

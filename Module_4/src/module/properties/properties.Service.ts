@@ -13,6 +13,8 @@ const createProperty = async (data: CreatePropertyData) => {
       price: data.price,
       location: data.location,
       category: data.category,
+      imageUrl: data.imageUrl ?? null,
+      isAvailable: data.isAvailable ?? true,
       landlordId: data.landlordId,
     },
     include: {

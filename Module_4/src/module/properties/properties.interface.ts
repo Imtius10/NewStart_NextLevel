@@ -5,6 +5,8 @@ export interface CreatePropertyData {
   price: number;
   location: string;
   category: string;
+  imageUrl?: string;
+  isAvailable?: boolean;
   landlordId: string;
 }
 
@@ -14,6 +16,8 @@ export interface UpdatePropertyData {
   price?: number;
   location?: string;
   category?: string;
+  imageUrl?: string;
+  isAvailable?: boolean;
 }
 
 export interface PropertyQuery {
