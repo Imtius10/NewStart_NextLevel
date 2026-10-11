@@ -456,10 +456,89 @@ const testConfirmPayment = async (paymentId: string) => {
   return updatedPayment;
 };
 
+/**
+ * Verify a Stripe Checkout session server-side and mark the
+ * payment as PAID when Stripe reports it paid. Used by the
+ * frontend success page so the UI is correct even before the
+ * webhook is delivered.
+ */
+const verifyPayment = async (
+  sessionId: string,
+  tenantId: string
+) => {
+  const session = await stripe.checkout.sessions.retrieve(
+    sessionId
+  );
+
+  const paymentId = session.metadata?.paymentId;
+  const sessionTenantId = session.metadata?.tenantId;
+
+  if (!paymentId || sessionTenantId !== tenantId) {
+    throw new Error("Invalid checkout session");
+  }
+
+  const existing = await prisma.payment.findUnique({
+    where: { id: paymentId },
+  });
+
+  if (!existing) {
+    throw new Error("Payment not found");
+  }
+
+  if (
+    session.payment_status !== "paid" &&
+    session.status !== "complete"
+  ) {
+    return {
+      payment: existing,
+      paid: false,
+      status: session.status as string,
+    };
+  }
+
+  const transactionId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  const payment = await prisma.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const current = await tx.payment.findUnique({
+        where: { id: paymentId },
+      });
+
+      if (!current) {
+        throw new Error("Payment not found");
+      }
+
+      if (current.status === PaymentStatus.PAID) {
+        return current;
+      }
+
+      return tx.payment.update({
+        where: { id: paymentId },
+        data: {
+          status: PaymentStatus.PAID,
+          transactionId:
+            transactionId ??
+            `cs_${Date.now()}`,
+        },
+      });
+    }
+  );
+
+  return {
+    payment,
+    paid: payment.status === PaymentStatus.PAID,
+    status: session.status as string,
+  };
+};
+
 export const paymentService = {
     createPayment,
     getMyPayments,
     getPaymentById,
     handleStripeWebhook,
+    verifyPayment,
     testConfirmPayment
 };

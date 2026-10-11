@@ -26,6 +26,16 @@ router.get(
 );
 
 /**
+ * Verify a Stripe Checkout session (called from the
+ * frontend /payment/success page)
+ */
+router.post(
+  "/verify",
+  auth(UserRole.TENANT),
+  paymentController.verifyPayment
+);
+
+/**
  * Get one payment
  */
 router.get(

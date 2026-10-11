@@ -127,9 +127,43 @@ const testConfirmPayment = catchAsync(
   }
 );
 
+/**
+ * ============================================================
+ * VERIFY CHECKOUT SESSION (after Stripe redirect)
+ * ============================================================
+ */
+const verifyPayment = catchAsync(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      throw new Error("Session ID is required");
+    }
+
+    const result = await paymentService.verifyPayment(
+      sessionId,
+      req.user.id
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: result.paid
+        ? "Payment verified successfully"
+        : "Payment still processing",
+      data: result,
+    });
+  }
+);
+
 export const paymentController = {
   createPayment,
   getMyPayments,
   getPaymentById,
+  verifyPayment,
   testConfirmPayment,
 };
