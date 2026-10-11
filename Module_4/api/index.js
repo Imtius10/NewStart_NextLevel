@@ -46274,6 +46274,16 @@ var getMyRentalRequests3 = async (landlordId, page = 1, limit = 10) => {
             email: true,
             activeStatus: true
           }
+        },
+        payment: {
+          select: {
+            id: true,
+            rentalRequestId: true,
+            amount: true,
+            transactionId: true,
+            status: true,
+            createdAt: true
+          }
         }
       },
       orderBy: {
@@ -46742,6 +46752,16 @@ var getAllRentalRequests = async (page = 1, limit = 10) => {
             name: true,
             email: true,
             activeStatus: true
+          }
+        },
+        payment: {
+          select: {
+            id: true,
+            rentalRequestId: true,
+            amount: true,
+            transactionId: true,
+            status: true,
+            createdAt: true
           }
         }
       },
