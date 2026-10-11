@@ -206,16 +206,6 @@ const getAllRentalRequests = async (page: number = 1, limit: number = 10) => {
             activeStatus: true,
           },
         },
-        payment: {
-          select: {
-            id: true,
-            rentalRequestId: true,
-            amount: true,
-            transactionId: true,
-            status: true,
-            createdAt: true,
-          },
-        },
       },
       orderBy: {
         createdAt: "desc",
