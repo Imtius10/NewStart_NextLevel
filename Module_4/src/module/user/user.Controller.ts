@@ -4,6 +4,17 @@ import { userService } from "./user.Service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from 'http-status';
 
+const isProd = process.env.NODE_ENV === "production";
+
+const cookieOptions = (maxAge: number) => ({
+    httpOnly: true,
+    // Cross-site (frontend on Vercel, API on another domain) requires
+    // SameSite=None + Secure in production; localhost uses Lax.
+    sameSite: (isProd ? "none" : "lax") as "none" | "lax",
+    secure: isProd,
+    maxAge,
+});
+
 
 const userRegister = catchAsync(async (req:Request,res:Response,next:NextFunction) => {
     const result = await userService.userRegisterDB(req.body);
@@ -22,20 +33,10 @@ const userLogin = catchAsync(async (req:Request,res:Response,next:NextFunction) 
     const result = await userService.LoginUserDB(req.body);
 
 
-    res.cookie("accessToken", result.accessToken, {
-      httpOnly: true,
-      
-      sameSite: "lax",
-      maxAge: 15 * 60 * 1000,
-    });
+    res.cookie("accessToken", result.accessToken, cookieOptions(15 * 60 * 1000));
 
     // Refresh token cookie
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("refreshToken", result.refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
 
     sendResponse(res, {
         success: true,
@@ -60,7 +61,12 @@ const getMyProfile = catchAsync(async (req: Request, res: Response, next: NextFu
 
 
 const refreshToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.refreshToken;
+    const authHeader = req.headers.authorization;
+    const tokenFromHeader =
+        authHeader && authHeader.startsWith("Bearer ")
+            ? authHeader.slice(7)
+            : undefined;
+    const token = tokenFromHeader || req.cookies.refreshToken;
 
     if (!token) {
         throw new Error("Refresh token not found");
@@ -68,11 +74,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response, next: NextFu
 
     const result = await userService.refreshToken(token);
 
-    res.cookie("accessToken", result.accessToken, {
-        httpOnly: true,
-        sameSite: "lax",
-        maxAge: 15 * 60 * 1000,
-    });
+    res.cookie("accessToken", result.accessToken, cookieOptions(15 * 60 * 1000));
 
     sendResponse(res, {
         success: true,

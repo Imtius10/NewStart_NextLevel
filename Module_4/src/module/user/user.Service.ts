@@ -8,7 +8,31 @@ import { createToken } from "../../utils/jwtUtils";
 const userRegisterDB = async (payload:IRegister) => { 
 
 
-    const { name, email, password } = payload;
+    const { name, email, password, role } = payload;
+
+    if (!name || !email || !password) {
+        throw new GlobalError(
+            httpStatus.BAD_REQUEST,
+            "Name, email and password are required"
+        );
+    }
+
+    if (password.length < 6) {
+        throw new GlobalError(
+            httpStatus.BAD_REQUEST,
+            "Password must be at least 6 characters"
+        );
+    }
+
+    // Self-registration only allows tenant/landlord. Admin is seed-only.
+    if (role && role !== "TENANT" && role !== "LANDLORD") {
+        throw new GlobalError(
+            httpStatus.FORBIDDEN,
+            "Registration only allows TENANT or LANDLORD roles"
+        );
+    }
+
+    const requestedRole = role ?? "TENANT";
 
     const isUserExist = await prisma.user.findUnique({
         where: {
@@ -31,7 +55,8 @@ const userRegisterDB = async (payload:IRegister) => {
         data: {
             name,
             email,
-            password: hasspassword
+            password: hasspassword,
+            role: requestedRole
         }
     });
 
@@ -61,6 +86,13 @@ const LoginUserDB = async (payload: ILoggedIn) => {
 
     if (!validUser) {
         throw new Error("Email or password wrong");
+    }
+
+    if (validUser.activeStatus === "BLOCKED") {
+        throw new GlobalError(
+            httpStatus.FORBIDDEN,
+            "Your account has been blocked by the admin"
+        );
     }
 
     const matchedPassword = await bcrypt.compare(password, validUser.password);
